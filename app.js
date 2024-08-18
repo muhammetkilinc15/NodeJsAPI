@@ -1,7 +1,7 @@
 const express = require("express")
 const app = express();
 app.use(express.json())
-const Joi = require('joi'); // valildasyonlar için kütüphane
+const productValidater = require("./Validators/productValidator")
 
 
 
@@ -27,7 +27,7 @@ app.post("/api/products", (req, res) => {
     const productId = req.params.id;
     const product = products.find(p=>p.id==productId)
     // Veriyi doğrulama
-    const { error }  = validateProduct(req.body)
+    const { error }  = productValidater.validateProduct(req.body)
 
     if (error) {
         return res.status(400).send(error.details[0].message);
@@ -52,7 +52,7 @@ app.put("/api/products/:id",(req,res)=>{
    
 
     // Veriyi doğrulama
-    const { error } = validateProduct(req.body)
+    const { error } = productValidater.validateProduct(req.body)
     if (error) {
         return res.status(400).send(error.details[0].message);
     }
@@ -76,14 +76,6 @@ app.get("/api/products/:id",(req,res)=>{
     res.send(product);
 })
 
-function validateProduct(product){
- // Joi schema tanımlaması
-    const schema = Joi.object({
-    name: Joi.string().min(3).max(30).required(),
-    price: Joi.number().min(0).required()
-    });
-    return schema.validate(product)
-}
 
 
 app.listen(3000,()=>{
