@@ -1,4 +1,6 @@
 npm i express
 npm i nodemon --save-dev // projeye özel 
 npm i -g nodemon // bilgisayara yükler 
- npm i joi // validasyon işlemleri için
+npm i joi // validasyon işlemleri için
+npm i cors // cors ayarları için
+npm i mongoose  // mongo db kurulumu

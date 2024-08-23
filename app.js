@@ -1,83 +1,42 @@
-const express = require("express")
+const express = require("express");
 const app = express();
-app.use(express.json())
-const productValidater = require("./Validators/productValidator")
+const mongoose = require("mongoose");
+
+const cors = require("cors");
+app.use(express.json());
+
+const products = require("./routes/product");
+const home = require("./routes/homej");
+const mongoDb = require("./config/config");
+const { func } = require("joi");
+
+app.use(
+  cors({
+    origin: "*", // herkes apiye erişebilir
+    methods: ["GET", "POST"],
+  })
+);
+
+app.use("/", home);
+app.use("/api/products", products);
 
 
 
-// http nethods : get ,post, put , delete
-
-const products = [
-    {id : 1 , name : "Iphone 12",price : 1399 },
-    {id : 2 , name : "Samsung A24",price : 899 },
-    {id : 3 , name : "Oppo A5",price : 1299 }
-]
-
-app.get("/",(req,res)=>{
-    res.send(products[0])
-})
-
-
-app.get("/api/products",(req,res)=>{
-    res.send(products)
-})
-
-
-app.post("/api/products", (req, res) => {  
-    const productId = req.params.id;
-    const product = products.find(p=>p.id==productId)
-    // Veriyi doğrulama
-    const { error }  = productValidater.validateProduct(req.body)
-
-    if (error) {
-        return res.status(400).send(error.details[0].message);
-    }
-
-    // Doğrulama başarılıysa, ürünleri işleme
-    const { name, price } = req.body;
-    const id = products.length + 1;
-
-    products.push({ id, name, price });
-
-    res.status(201).send(`${name} oluşturuldu`);
-});
-
-
-app.put("/api/products/:id",(req,res)=>{
-    const productId = req.params.id;
-    const product = products.find(p=>p.id==productId)
-    if(product == null){
-        return res.status(404).send("Ürün bulunamadı")
-    }
-   
-
-    // Veriyi doğrulama
-    const { error } = productValidater.validateProduct(req.body)
-    if (error) {
-        return res.status(400).send(error.details[0].message);
-    }
-
-    product.name = req.body.name
-    product.price = req.body.price
-    return res.send(product.id+ " sahip ürün  güncellendi")
-
-
-})
-
-
-app.get("/api/products/:id",(req,res)=>{
-    const productId = req.params.id;
-    const product = products.find(p=>p.id==productId)
-    if(product == null)
-    {
-        res.status(404).send("aradığınız ürün bulunamadı")
-    }
-
-    res.send(product);
-})
 
 
 
-app.listen(3000,()=>{
-    console.log("Listening on port 3000")
+async function connectMongoDb(){
+  try{
+  await  mongoose.connect(`mongodb+srv://${mongoDb.username}:${mongoDb.password}@cluster0.e0i19.mongodb.net/shopdb?retryWrites=true&w=majority&appName=Cluster0`)
+  console.log("Mongo db bağlantısı gerçekleşti")
+
+}catch(err){
+    console.log(err)
+  }
+}
+
+connectMongoDb(); // mongo db baglantı
+app.listen(3000, () => {
+  
+  console.log("Listening on port 3000");
 });
